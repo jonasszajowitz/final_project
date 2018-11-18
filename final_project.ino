@@ -1,10 +1,13 @@
 
 int buttonPins [4] = {25, 26, 27, 28};
+int ledPins [4] = {3, 5, 7, 9};
 boolean lastButtonState [4] = {LOW, LOW, LOW, LOW};
 boolean buttonState[4] = {LOW, LOW, LOW, LOW};
 boolean on[4] = {false, false, false, false};
+unsigned long lastPress = 0;
 int midiNotes [4] = {38, 42, 45, 48};
 int startTimes [3][4];
+
 //for loop in setup multi array 3 of 4 -- place random numbers , check every time millis -- moves forward
 //generate sequence -- loop generate sequence (generateSequence();) mode ;; within array, check current time, if it has become that time, if so turn note on
 // auto sequence (randomized)
@@ -18,16 +21,24 @@ void setup() {
 
   for (int i = 0; i < 4; i++) {
     pinMode(buttonPins[i], INPUT);
+    pinMode(ledPins[i], OUTPUT);
+
   }
 }
 
 void loop() {
 
-  checkButton();
+  manualButton();
+  randomButton();
+
 
 }
 
-void checkButton() {
+void manualButton() {
+
+  if (lastPress + 200 > millis()) {
+    return;
+  }
 
   for (int i = 0; i < 4; i++) {
 
@@ -35,15 +46,35 @@ void checkButton() {
     buttonState[i] = digitalRead(buttonPins[i]);
 
     if (buttonState[i] == HIGH && lastButtonState[i] == LOW) {
-      on[i] = !on[i];
 
-      if (on[i] == true) {
-        usbMIDI.sendNoteOn (midiNotes[i], 127, 1);
-      }
-      else if (on[i] == false) {
-        usbMIDI.sendNoteOff (midiNotes[i], 127, 1);
-      }
+      lastPress = millis();
 
+      triggerButton(i);
     }
   }
+}
+
+//void randomButton () {
+
+  if (random(1000000) == 1) {
+    triggerButton(0);
+  }
+  if (random(1000000) == 4) {
+    triggerButton(1);
+  }
+}
+
+void triggerButton (int button) {
+
+  on[button] = !on[button];
+
+  if (on[button] == true) {
+    usbMIDI.sendNoteOn (midiNotes[button], 127, 1);
+    digitalWrite(ledPins[button], HIGH);
+  }
+  else if (on[button] == false) {
+    usbMIDI.sendNoteOff (midiNotes[button], 127, 1);
+    digitalWrite(ledPins[button], LOW);
+  }
+
 }
