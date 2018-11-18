@@ -1,11 +1,12 @@
 
-int buttonPins [4] = {25, 26, 27, 28};
-int ledPins [4] = {3, 5, 7, 9};
-boolean lastButtonState [4] = {LOW, LOW, LOW, LOW};
-boolean buttonState[4] = {LOW, LOW, LOW, LOW};
-boolean on[4] = {false, false, false, false};
+int buttonPins [6] = {25, 26, 27, 28, 33, 34};
+int ledPins [6] = {1, 3, 5, 7, 9, 11};
+int slideSwitch = 35;
+boolean lastButtonState [6] = {LOW, LOW, LOW, LOW, LOW, LOW};
+boolean buttonState[6] = {LOW, LOW, LOW, LOW, LOW, LOW};
+boolean on[6] = {false, false, false, false, false, false};
 unsigned long lastPress = 0;
-int midiNotes [4] = {38, 42, 45, 48};
+int midiNotes [6] = {38, 42, 45, 48, 52, 56};
 int startTimes [3][4];
 
 //for loop in setup multi array 3 of 4 -- place random numbers , check every time millis -- moves forward
@@ -19,28 +20,31 @@ int startTimes [3][4];
 
 void setup() {
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 6; i++) {
     pinMode(buttonPins[i], INPUT);
     pinMode(ledPins[i], OUTPUT);
+    pinMode(slideSwitch, INPUT);
 
   }
 }
 
 void loop() {
 
-  manualButton();
-  randomButton();
-
-
+  if (digitalRead(slideSwitch) == HIGH) {
+    manualMode();
+  }
+  if (digitalRead(slideSwitch) == LOW) {
+    randomMode();
+  }
 }
 
-void manualButton() {
+void manualMode() {
 
   if (lastPress + 200 > millis()) {
     return;
   }
 
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 6; i++) {
 
     lastButtonState[i] = buttonState[i];
     buttonState[i] = digitalRead(buttonPins[i]);
@@ -54,12 +58,12 @@ void manualButton() {
   }
 }
 
-//void randomButton () {
+void randomMode() {
 
   if (random(1000000) == 1) {
     triggerButton(0);
   }
-  if (random(1000000) == 4) {
+  if (random(1000000) == 3) {
     triggerButton(1);
   }
 }
